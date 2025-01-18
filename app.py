@@ -1,16 +1,13 @@
 import os
 from flask import Flask, render_template, request, jsonify, url_for
 from werkzeug.utils import secure_filename
-from flask_cors import CORS
-from app.opencv.grayscale import convert_to_grayscale
+from opencv.grayscale import convert_to_grayscale
 
 app = Flask(__name__, static_folder='static')
 
-CORS(app)
-
 # Configure file upload settings
-app.config['UPLOAD_FOLDER'] = os.path.join('app', 'static', 'uploads')
-app.config['PROCESSED_FOLDER'] = os.path.join('app', 'static', 'processed')
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')
+app.config['PROCESSED_FOLDER'] = os.path.join('static', 'processed')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB limit
 
@@ -54,5 +51,6 @@ def process_image():
         }), 200
     else:
         return jsonify({"error": "Invalid file format. Only .jpg, .jpeg, or .png allowed."}), 400
+
 if __name__ == "__main__":
     app.run(debug=True)
