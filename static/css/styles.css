@@ -1,62 +1,126 @@
-
-            html, body {
-                height: 100%;
-                margin: 0;
-                display: flex;
-                flex-direction: column;
-            }
-
-            .custom-navbar {
-                background: linear-gradient(45deg, #007bff, #6610f2);
-                color: white;
-            }
-
-            .navbar-brand {
-                font-weight: 700;
-                color: white !important;
-            }
-
-            .btn-primary, .btn-success {
-                border-radius: 20px;
-            }
-
-            .btn-primary:hover, .btn-success:hover {
-                transform: scale(1.05);
-                transition: all 0.3s ease-in-out;
-            }
-
-            .img-container {
-                background-color: #f8f9fa;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                transition: transform 0.3s ease-in-out;
-
-            }
-
-            .img-container:hover {
-                transform: scale(1.02);
-            }
-
-            .content {
-            flex: 1;
-            }
-
-        .footer {
-
-            background-color: #343a40;
-            color: white;
-            text-align: center;
-            padding: 10px 0;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%; /* Allow the content to extend beyond the viewport height */
 }
 
-        .footer a {
-            color: #6c757d;
-            text-decoration: none;
-            margin: 0 10px;
-        }
+.custom-navbar {
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    color: white;
+}
 
-        .footer a:hover {
-            color: white;
-        }
+.navbar-brand {
+    font-weight: 700;
+    color: white !important;
+}
+
+.btn-primary, .btn-success {
+    border-radius: 20px;
+}
+
+.btn-primary:hover, .btn-success:hover {
+    transform: scale(1.05);
+    transition: all 0.3s ease-in-out;
+}
+
+.img-container {
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+    display: inline-block;
+    max-width: 400px; /* Set the maximum width for the container */
+}
+
+.img-container img {
+    width: 100%; /* Make the image fill the container's width */
+    height: auto; /* Maintain the aspect ratio */
+}
+
+.img-container:hover {
+    transform: scale(1.02);
+}
+
+.input-button-container {
+    display: flex;
+    align-items: baseline; /* Align file input and button vertically */
+    gap: 10px; /* Add spacing between the input and the button */
+    width: 100%; /* Ensure it adapts to the parent width */
+}
+
+.custom-form-control {
+    flex: 1; /* Let the input take up remaining space */
+    padding: 10px; /* Add padding for a better look */
+    font-size: 16px; /* Adjust font size */
+    line-height: 1.5; /* Improve readability */
+    color: #495057; /* Text color */
+    background-color: #fff; /* Background color */
+    border: 1px solid #ced4da; /* Border style */
+    border-radius: 5px; /* Rounded corners */
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Smooth hover effect */
+}
+
+.custom-form-control:hover {
+    border-color: #007bff; /* Change border color on hover */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Add a subtle shadow effect */
+}
+
+.custom-form-control:focus {
+    outline: none; /* Remove default outline */
+    border-color: #007bff; /* Highlight border on focus */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.8); /* Enhance shadow on focus */
+}
+
+.btn-primary {
+    padding: 10px 20px; /* Adjust button padding */
+    font-size: 16px; /* Adjust font size for consistency */
+    white-space: nowrap; /* Prevent wrapping */
+    border-radius: 20px;
+}
+
+.btn-success {
+    padding: 10px 20px; /* Adjust button padding */
+    font-size: 16px; /* Adjust font size for consistency */
+    white-space: nowrap; /* Prevent wrapping */
+    border-radius: 20px;
+}
+
+
+.content {
+    flex: 1; /* Allow the content to fill available space */
+    overflow-y: auto; /* Enable scrolling if the content overflows */
+}
+
+.footer {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer a {
+    color: #6c757d;
+    text-decoration: none;
+    margin: 0 10px;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .input-button-container {
+        flex-direction: column; /* Stack elements vertically on small screens */
+        gap: 5px;
+    }
+
+    .custom-form-control {
+        width: 100%; /* Make input take full width */
+    }
+
+    .btn-primary {
+        width: 100%; /* Make button take full width */
+    }
+}

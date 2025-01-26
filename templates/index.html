@@ -18,7 +18,6 @@
     </nav>
 
     <div class="container mt-5">
-        <h1 class="text-center mb-4">Shadow Removal</h1>
 
         <div class="row">
             <div class="col-md-6 text-center">
@@ -38,15 +37,18 @@
 
         <div class="mt-4 text-center">
             <form method="POST" action="/process" enctype="multipart/form-data" id="image-form">
-                <label for="image" class="form-label">Choose an Image</label>
-                <input type="file" name="image" id="image" class="form-control mb-3">
-                <button type="submit" class="btn btn-primary">Upload & Process</button>
+                <div class="input-button-container">
+                    <input type="file" name="image" id="image" class="form-control mb-3 custom-form-control">
+                    <button type="submit" class="btn btn-primary">Upload & Process</button>
+                    <div class="mt-4 text-center" id="download-container" style="display: none;">
+                        <a href="#" download class="btn btn-success" id="download-button">Download Processed Image</a>
+                    </div>
+                </div>
             </form>
         </div>
 
-        <div class="mt-4 text-center" id="download-container" style="display: none;">
-            <a href="#" download class="btn btn-success" id="download-button">Download Processed Image</a>
-        </div>
+
+
     </div>
 
     <footer class="footer">
