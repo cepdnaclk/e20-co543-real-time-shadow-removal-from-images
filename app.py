@@ -2,6 +2,7 @@ import os
 from flask import Flask, render_template, request, jsonify, url_for
 from werkzeug.utils import secure_filename
 from opencv.grayscale import convert_to_grayscale
+from opencv.shadow_removal import remove_shadows
 
 app = Flask(__name__, static_folder='static')
 
@@ -41,7 +42,7 @@ def process_image():
 
         # Process the image to grayscale
         try:
-            convert_to_grayscale(input_path, output_path)
+            remove_shadows(input_path, output_path)
         except ValueError as e:
             return jsonify({"error": str(e)}), 500
 
