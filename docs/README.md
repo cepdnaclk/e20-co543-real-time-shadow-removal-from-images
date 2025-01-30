@@ -64,10 +64,10 @@ This is a sample image, to show how to add images to your page. To learn more op
 
 ## Links
 
-- [Project Repository](https://github.com/cepdnaclk/{{ page.repository-name }}){:target="_blank"}
-- [Project Page](https://cepdnaclk.github.io/{{ page.repository-name}}){:target="_blank"}
+- [Project Repository](https://github.com/cepdnaclk/e20-co543-real-time-shadow-removal-from-images)
 - [Department of Computer Engineering](http://www.ce.pdn.ac.lk/)
 - [University of Peradeniya](https://eng.pdn.ac.lk/)
+
 
 
 [//]: # (Please refer this to learn more about Markdown syntax)
