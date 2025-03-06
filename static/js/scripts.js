@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const downloadButton = document.getElementById("download-button");
     const form = document.getElementById("image-form");
 
+    // Store initial placeholder URL
+    const placeholderSrc = afterImageContainer.src;
+
     // Handle image upload preview
     if (imageInput) {
         imageInput.addEventListener("change", (event) => {
@@ -14,10 +17,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     if (beforeImageContainer) {
-                        beforeImageContainer.src = e.target.result; // Display the uploaded file
+                        beforeImageContainer.src = e.target.result;
                     }
+                    // Reset after image and download container
+                    afterImageContainer.src = placeholderSrc;
+                    downloadContainer.style.display = "none";
                 };
-                reader.readAsDataURL(file); // Convert the file to a Data URL
+                reader.readAsDataURL(file);
             }
         });
     }
