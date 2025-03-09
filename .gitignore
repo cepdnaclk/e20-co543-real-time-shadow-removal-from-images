@@ -1,0 +1,4 @@
+/static/processed/*
+/static/uploads/*
+
+/opencv/__pycache__*    
