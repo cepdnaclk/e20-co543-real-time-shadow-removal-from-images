@@ -1,12 +1,9 @@
-/static/processed/*
-/static/uploads/*
-
 /opencv/__pycache__*    
 
-/dataset/test/*
-/dataset/train/*
+/dataset/test/
+/dataset/train/
 
-/static/images/processed/*
-/static/images/uploads/*
+/static/images/processed/
+/static/images/uploads/
 
-/trainedModel/*
+/trainedModel/
