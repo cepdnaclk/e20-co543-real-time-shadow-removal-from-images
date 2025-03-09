@@ -1,69 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadow Removal</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real-Time Shadow Removal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
+      .container {
+        margin: 50px auto;
+        width: 50%;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      }
 
-<body>
-    <nav class="navbar navbar-expand-lg custom-navbar">
-        <div class="container">
-            <a class="navbar-brand" href="#"><i class="bi bi-brightness-high"></i> Real-Time Shadow Removal</a>
+      h2 {
+        color: #333;
+      }
+
+      button {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 16px;
+        border-radius: 5px;
+        transition: background 0.3s ease-in-out;
+      }
+
+      button:hover {
+        background-color: #218838;
+      }
+
+      .image-container {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+      }
+
+      .image-box {
+        text-align: center;
+      }
+
+      h3 {
+        color: #555;
+      }
+
+      img {
+        width: 250px;
+        height: 250px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        object-fit: cover;
+        display: none;
+      }
+
+      .loader {
+        border: 5px solid #f3f3f3;
+        border-top: 5px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+        margin: 20px auto;
+        display: none;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Upload an Image for Shadow Removal</h2>
+      <input type="file" id="imageInput" />
+      <button onclick="uploadImage()">Remove Shadows</button>
+
+      <div class="loader" id="loader"></div>
+
+      <div class="image-container">
+        <div class="image-box">
+          <h3>Before</h3>
+          <img id="inputImage" />
         </div>
-    </nav>
-
-    <div class="container mt-5">
-
-        <div class="row">
-            <div class="col-md-6 text-center">
-                <h4>Before</h4>
-                <div class="img-container border p-2 rounded">
-                    <img src="{{ url_for('static', filename='images/placeholder.png') }}" class="img-fluid rounded" alt="Before Image" id="before-image">
-                </div>
-            </div>
-
-            <div class="col-md-6 text-center">
-                <h4>After</h4>
-                <div class="img-container border p-2 rounded">
-                    <img src="{{ url_for('static', filename='images/placeholder.png') }}" class="img-fluid rounded" alt="After Image" id="after-image">
-                </div>
-            </div>
+        <div class="image-box">
+          <h3>After</h3>
+          <img id="resultImage" />
         </div>
-
-        <div class="mt-4 text-center">
-            <form method="POST" action="/process" enctype="multipart/form-data" id="image-form">
-                <div class="input-button-container">
-                    <input type="file" name="image" id="image" class="form-control mb-3 custom-form-control">
-                    <button type="submit" class="btn btn-primary">Upload & Process</button>
-                    <div class="mt-4 text-center" id="download-container" style="display: none;">
-                        <a href="#" download class="btn btn-success" id="download-button">Download Processed Image</a>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-
-
+      </div>
     </div>
 
-    <footer class="footer">
-        <div class="container">
-            <p>© 2025 Shadow Removal App</p>
-            <div>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Use</a>
-                <a href="#">Contact Us</a>
-            </div>
-        </div>
-    </footer>
+    <script>
+      function uploadImage() {
+        let input = document.getElementById("imageInput");
+        if (input.files.length === 0) {
+          alert("Please select an image.");
+          return;
+        }
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
-</body>
+        let formData = new FormData();
+        formData.append("image", input.files[0]);
 
+        let loader = document.getElementById("loader");
+        loader.style.display = "block";
+
+        fetch("/remove_shadow", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            loader.style.display = "none";
+            if (data.error) {
+              alert(data.error);
+              return;
+            }
+            document.getElementById("inputImage").src = data.input_url;
+            document.getElementById("resultImage").src = data.output_url;
+            document.getElementById("inputImage").style.display = "block";
+            document.getElementById("resultImage").style.display = "block";
+          })
+          .catch((error) => {
+            loader.style.display = "none";
+            console.error("Error:", error);
+          });
+      }
+    </script>
+  </body>
 </html>
