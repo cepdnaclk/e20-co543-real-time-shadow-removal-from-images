@@ -1,63 +1,79 @@
 import cv2
 import numpy as np
+import tensorflow as tf
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras import layers, models, losses
 
-def remove_shadows(input_path, output_path):
-    """
-    Remove shadows from an image using HSV and YCbCr color space corrections.
+# Load the pre-trained VGG model and perceptual model
+vgg = VGG16(include_top=False, weights='imagenet', input_shape=(256, 256, 3))
+perceptual_model = models.Model(vgg.input, vgg.layers[9].output)
+perceptual_model.trainable = False
 
-    Args:
-        input_path (str): Path to the input image.
-        output_path (str): Path to save the processed image with shadows removed.
+# Loss function
+def enhanced_loss(y_true, y_pred):
+    ssim_loss = 1 - tf.image.ssim(y_true, y_pred, max_val=2.0)
+    l1_loss = tf.reduce_mean(tf.abs(y_true - y_pred))
+    
+    y_true_vgg = (y_true + 1) * 127.5  # Scale to VGG input range
+    y_pred_vgg = (y_pred + 1) * 127.5
+    percep_loss = tf.reduce_mean(tf.square(
+        perceptual_model(y_true_vgg) - perceptual_model(y_pred_vgg)
+    ))
+    
+    return 0.6 * ssim_loss + 0.3 * l1_loss + 0.1 * percep_loss
 
-    Raises:
-        ValueError: If the image is not found or invalid format.
-    """
-    # Load the image
-    image = cv2.imread(input_path)
+# Load the trained model
+model = tf.keras.models.load_model("opencv/shadow_removal_model.keras", custom_objects={"enhanced_loss": enhanced_loss})
+
+# Preprocess the image
+def preprocess_image(image_path, target_size=(256, 256)):
+    image = cv2.imread(image_path)
     if image is None:
         raise ValueError("Image not found or invalid format.")
+    
+    image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert to RGB
+    image_resized = cv2.resize(image_rgb, target_size)  # Resize to model input size
+    image_normalized = image_resized / 127.5 - 1  # Normalize to [-1, 1]
+    
+    return image_rgb, image_normalized  # Return both original and normalized images
 
-    # Convert the image to HSV color space
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    v_channel = hsv[:, :, 2]
+# Post-process the image
+def postprocess_image(output_tensor, input_image):
+    output_image = (output_tensor[0] + 1) * 127.5  # Convert from [-1, 1] to [0, 255]
+    output_image = np.clip(output_image, 0, 255).astype(np.uint8)
+    
+    # Compute brightness of the input image
+    input_brightness = np.mean(input_image)
 
-    # Threshold to create a shadow mask
-    _, shadow_mask = cv2.threshold(v_channel, 80, 255, cv2.THRESH_BINARY_INV)
+    # Compute brightness of the output image
+    output_brightness = np.mean(output_image)
 
-    # Remove noise using morphological operations
-    kernel = np.ones((5, 5), np.uint8)
-    shadow_mask = cv2.morphologyEx(shadow_mask, cv2.MORPH_CLOSE, kernel)
+    # Adjust output image brightness if needed
+    brightness_factor = input_brightness / (output_brightness + 1e-7)  # Avoid division by zero
+    output_image = np.clip(output_image * brightness_factor, 0, 255).astype(np.uint8)
 
-    # Identify shadow and non-shadow regions
-    shadow_pixels = shadow_mask == 255
-    avg_non_shadow = np.mean(v_channel[~shadow_pixels])
+    return cv2.cvtColor(output_image, cv2.COLOR_RGB2BGR)  # Convert to BGR
 
-    # Adjust shadow pixels' brightness
-    v_channel[shadow_pixels] = np.clip(v_channel[shadow_pixels] * (255 / avg_non_shadow), 0, 255)
+# Function to remove shadows
+def remove_shadows(input_path, output_path):
+    original_image, input_image = preprocess_image(input_path)
 
-    # Update the HSV image and convert back to BGR
-    hsv[:, :, 2] = v_channel
-    corrected_image = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
+    # Add batch dimension to the input image
+    input_image = np.expand_dims(input_image, axis=0)  # Shape: (1, 256, 256, 3)
 
-    # Convert to YCbCr for further intensity correction
-    ycbcr = cv2.cvtColor(corrected_image, cv2.COLOR_BGR2YCrCb)
-    y_channel = ycbcr[:, :, 0]
+    # Create dummy masks with the same batch dimension
+    dummy_masks = np.zeros((input_image.shape[0], 256, 256, 1))  # Shape: (1, 256, 256, 1)
 
-    # Calculate mean and standard deviation for intensity correction
-    y_mean = np.mean(y_channel)
-    y_std = np.std(y_channel)
+    # Run model prediction
+    output_tensor = model.predict([input_image, dummy_masks])
 
-    # Refine shadow mask
-    refined_shadow_mask = np.where(y_channel < y_mean - (y_std / 3), 255, 0).astype(np.uint8)
+    # Post-process the result
+    output_image = postprocess_image(output_tensor, original_image)
 
-    # Further enhance brightness in shadow regions
-    avg_intensity_lit = np.mean(y_channel[refined_shadow_mask == 0])
-    avg_intensity_shadow = np.mean(y_channel[refined_shadow_mask == 255])
-    intensity_difference = avg_intensity_lit - avg_intensity_shadow
+    # Resize output back to original size
+    original_height, original_width = original_image.shape[:2]
+    output_image_resized = cv2.resize(output_image, (original_width, original_height))
 
-    y_channel[refined_shadow_mask == 255] = np.clip(y_channel[refined_shadow_mask == 255] + intensity_difference, 0, 255)
-    ycbcr[:, :, 0] = y_channel
+    # Save the final image
+    cv2.imwrite(output_path, output_image_resized)
 
-    # Convert back to BGR and save the output
-    final_result = cv2.cvtColor(ycbcr, cv2.COLOR_YCrCb2BGR)
-    cv2.imwrite(output_path, final_result)
